@@ -16,6 +16,10 @@ export function getShareUrl(activityName) {
 
 /**
  * Copy text to clipboard using modern Clipboard API
+ * 
+ * Note: Requires HTTPS or localhost, and user interaction.
+ * Modern browsers only - no fallback for legacy browsers.
+ * 
  * @param {string} text - Text to copy to clipboard
  * @returns {Promise<boolean>} True if copy was successful, false otherwise
  */
@@ -24,7 +28,7 @@ export async function copyToClipboard(text) {
     await navigator.clipboard.writeText(text);
     return true;
   } catch (err) {
-    // If clipboard API is not available, show error message
+    // Clipboard API not available or permission denied
     console.error('Clipboard API not available:', err);
     return false;
   }

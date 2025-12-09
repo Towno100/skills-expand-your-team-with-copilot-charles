@@ -73,9 +73,10 @@ export function initializeShareFunctionality(activitiesListElement, allActivitie
     }
   });
 
-  // Close share options when clicking outside
+  // Close share options when clicking outside the activities list
   document.addEventListener("click", (e) => {
-    if (!e.target.closest("#activities-list")) {
+    // Check if click is outside the passed activities list element
+    if (!activitiesListElement.contains(e.target)) {
       activitiesListElement.querySelectorAll("[data-share-options]").forEach(opts => {
         opts.classList.add("hidden");
       });
