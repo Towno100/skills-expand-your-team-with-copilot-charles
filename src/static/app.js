@@ -480,18 +480,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Configuration
   const SCHOOL_NAME = 'Mergington High School';
+  const SHARE_POPUP_WIDTH = 600;
+  const SHARE_POPUP_HEIGHT = 400;
+  const COPY_FEEDBACK_DURATION = 2000; // milliseconds
+  const SHARE_MENU_HIDE_DELAY = 100; // milliseconds
 
   // Function to handle sharing an activity
   function shareActivity(platform, activityName, description, schedule) {
     const shareUrl = getShareUrl(activityName);
     const shareText = `Check out ${activityName} at ${SCHOOL_NAME}! ${description} - ${schedule}`;
+    const popupOptions = `width=${SHARE_POPUP_WIDTH},height=${SHARE_POPUP_HEIGHT}`;
     
     switch (platform) {
       case 'facebook':
-        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`, '_blank', 'width=600,height=400');
+        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`, '_blank', popupOptions);
         break;
       case 'twitter':
-        window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`, '_blank', 'width=600,height=400');
+        window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`, '_blank', popupOptions);
         break;
       case 'email':
         window.location.href = `mailto:?subject=${encodeURIComponent('Check out this activity!')}&body=${encodeURIComponent(shareText + '\n\n' + shareUrl)}`;
@@ -699,7 +704,7 @@ document.addEventListener("DOMContentLoaded", () => {
             setTimeout(() => {
               button.textContent = '🔗 Copy Link';
               button.classList.remove('copied');
-            }, 2000);
+            }, COPY_FEEDBACK_DURATION);
           } else {
             showMessage('Failed to copy link', 'error');
           }
@@ -713,7 +718,7 @@ document.addEventListener("DOMContentLoaded", () => {
           if (shareOptions) {
             shareOptions.classList.add("hidden");
           }
-        }, 100);
+        }, SHARE_MENU_HIDE_DELAY);
       }
     }
   });
