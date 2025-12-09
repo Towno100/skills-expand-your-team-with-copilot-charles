@@ -163,6 +163,17 @@ initial_activities = {
         },
         "max_participants": 16,
         "participants": ["william@mergington.edu", "jacob@mergington.edu"]
+    },
+    "Manga Maniacs": {
+        "description": "Explore the fantastic stories of the most interesting characters from Japanese Manga (graphic novels).",
+        "schedule": "Tuesdays, 5:00 PM - 6:30 PM",
+        "schedule_details": {
+            "days": ["Tuesday"],
+            "start_time": "17:00",
+            "end_time": "18:30"
+        },
+        "max_participants": 15,
+        "participants": []
     }
 }
 
