@@ -1,3 +1,5 @@
+import { initializeShareFunctionality } from './share-ui.js';
+
 document.addEventListener("DOMContentLoaded", () => {
   // DOM elements
   const activitiesList = document.getElementById("activities-list");
@@ -472,54 +474,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Function to generate share URL for an activity
-  function getShareUrl(activityName) {
-    const baseUrl = window.location.origin + window.location.pathname;
-    return `${baseUrl}?activity=${encodeURIComponent(activityName)}`;
-  }
-
-  // Configuration
-  const SCHOOL_NAME = 'Mergington High School';
-  const SHARE_POPUP_WIDTH = 600;
-  const SHARE_POPUP_HEIGHT = 400;
-  const COPY_FEEDBACK_DURATION = 2000; // milliseconds
-  const SHARE_MENU_HIDE_DELAY = 100; // milliseconds
-
-  // Function to handle sharing an activity
-  function shareActivity(platform, activityName, description, schedule) {
-    const shareUrl = getShareUrl(activityName);
-    const shareText = `Check out ${activityName} at ${SCHOOL_NAME}! ${description} - ${schedule}`;
-    const popupOptions = `width=${SHARE_POPUP_WIDTH},height=${SHARE_POPUP_HEIGHT}`;
-    
-    switch (platform) {
-      case 'facebook':
-        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`, '_blank', popupOptions);
-        break;
-      case 'twitter':
-        window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`, '_blank', popupOptions);
-        break;
-      case 'email':
-        window.location.href = `mailto:?subject=${encodeURIComponent('Check out this activity!')}&body=${encodeURIComponent(shareText + '\n\n' + shareUrl)}`;
-        break;
-      case 'copy':
-        return copyToClipboard(shareUrl);
-      default:
-        console.error('Unknown share platform:', platform);
-    }
-  }
-
-  // Function to copy text to clipboard
-  async function copyToClipboard(text) {
-    try {
-      await navigator.clipboard.writeText(text);
-      return true;
-    } catch (err) {
-      // If clipboard API is not available, show error message
-      console.error('Clipboard API not available:', err);
-      return false;
-    }
-  }
-
   // Function to render a single activity card
   function renderActivityCard(name, details) {
     const activityCard = document.createElement("div");
@@ -662,75 +616,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     activitiesList.appendChild(activityCard);
   }
-
-  // Event delegation for share buttons
-  activitiesList.addEventListener("click", async (e) => {
-    // Handle share button clicks
-    if (e.target.closest(".share-button")) {
-      e.stopPropagation();
-      const shareButton = e.target.closest(".share-button");
-      const activityName = shareButton.dataset.activity;
-      const shareOptions = activitiesList.querySelector(`[data-share-options="${activityName}"]`);
-      
-      if (shareOptions) {
-        // Close all other share options first
-        activitiesList.querySelectorAll("[data-share-options]").forEach(opts => {
-          if (opts !== shareOptions) {
-            opts.classList.add("hidden");
-          }
-        });
-        // Toggle current share options
-        shareOptions.classList.toggle("hidden");
-      }
-    }
-    
-    // Handle share option clicks
-    if (e.target.closest(".share-option")) {
-      e.stopPropagation();
-      const button = e.target.closest(".share-option");
-      const platform = button.dataset.platform;
-      const activityName = button.dataset.activity;
-      const activityDetails = allActivities[activityName];
-      
-      if (activityDetails) {
-        const formattedSchedule = formatSchedule(activityDetails);
-        
-        if (platform === 'copy') {
-          const success = await shareActivity(platform, activityName, activityDetails.description, formattedSchedule);
-          if (success) {
-            // Visual feedback for copy action
-            button.textContent = '✓ Copied!';
-            button.classList.add('copied');
-            setTimeout(() => {
-              button.textContent = '🔗 Copy Link';
-              button.classList.remove('copied');
-            }, COPY_FEEDBACK_DURATION);
-          } else {
-            showMessage('Failed to copy link', 'error');
-          }
-        } else {
-          shareActivity(platform, activityName, activityDetails.description, formattedSchedule);
-        }
-        
-        // Hide share options after sharing
-        setTimeout(() => {
-          const shareOptions = activitiesList.querySelector(`[data-share-options="${activityName}"]`);
-          if (shareOptions) {
-            shareOptions.classList.add("hidden");
-          }
-        }, SHARE_MENU_HIDE_DELAY);
-      }
-    }
-  });
-
-  // Close share options when clicking outside
-  document.addEventListener("click", (e) => {
-    if (!e.target.closest("#activities-list")) {
-      activitiesList.querySelectorAll("[data-share-options]").forEach(opts => {
-        opts.classList.add("hidden");
-      });
-    }
-  });
 
   // Event listeners for search and filter
   searchInput.addEventListener("input", (event) => {
@@ -1007,4 +892,7 @@ document.addEventListener("DOMContentLoaded", () => {
   checkAuthentication();
   initializeFilters();
   fetchActivities();
+  
+  // Initialize share functionality
+  initializeShareFunctionality(activitiesList, allActivities, formatSchedule, showMessage);
 });
