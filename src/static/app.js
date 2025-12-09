@@ -259,6 +259,10 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // Dark mode functions
+  function updateThemeIcon(isDarkMode) {
+    themeIcon.textContent = isDarkMode ? "☀️" : "🌙";
+  }
+
   function initializeDarkMode() {
     try {
       const savedTheme = localStorage.getItem("theme");
@@ -274,30 +278,24 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       if (isDarkMode) {
         document.body.classList.add("dark-mode");
-        themeIcon.textContent = "☀️";
       } else {
         document.body.classList.remove("dark-mode");
-        themeIcon.textContent = "🌙";
       }
+      updateThemeIcon(isDarkMode);
     } catch (error) {
       console.error("Error initializing dark mode:", error);
       // Default to light mode if there's an error
       document.body.classList.remove("dark-mode");
-      themeIcon.textContent = "🌙";
+      updateThemeIcon(false);
     }
   }
 
   function toggleDarkMode() {
     document.body.classList.toggle("dark-mode");
     const isDarkMode = document.body.classList.contains("dark-mode");
+    updateThemeIcon(isDarkMode);
     try {
-      if (isDarkMode) {
-        localStorage.setItem("theme", "dark");
-        themeIcon.textContent = "☀️";
-      } else {
-        localStorage.setItem("theme", "light");
-        themeIcon.textContent = "🌙";
-      }
+      localStorage.setItem("theme", isDarkMode ? "dark" : "light");
     } catch (error) {
       console.error("Error saving theme preference:", error);
       // Continue with theme change even if localStorage fails
