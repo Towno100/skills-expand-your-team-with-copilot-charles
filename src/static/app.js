@@ -1,3 +1,5 @@
+import { initializeShareFunctionality } from './share-ui.js';
+
 document.addEventListener("DOMContentLoaded", () => {
   // DOM elements
   const activitiesList = document.getElementById("activities-list");
@@ -570,6 +572,30 @@ document.addEventListener("DOMContentLoaded", () => {
       </div>
     `;
 
+    // Create share buttons
+    const shareButtonsHtml = `
+      <div class="share-container">
+        <button class="share-button" data-activity="${name}">
+          <span class="share-icon">📤</span>
+          <span>Share Activity</span>
+        </button>
+        <div class="share-options hidden" data-share-options="${name}">
+          <button class="share-option facebook" data-platform="facebook" data-activity="${name}">
+            📘 Facebook
+          </button>
+          <button class="share-option twitter" data-platform="twitter" data-activity="${name}">
+            🐦 Twitter
+          </button>
+          <button class="share-option email" data-platform="email" data-activity="${name}">
+            ✉️ Email
+          </button>
+          <button class="share-option copy" data-platform="copy" data-activity="${name}">
+            🔗 Copy Link
+          </button>
+        </div>
+      </div>
+    `;
+
     activityCard.innerHTML = `
       ${tagHtml}
       <h4>${name}</h4>
@@ -620,6 +646,7 @@ document.addEventListener("DOMContentLoaded", () => {
         `
         }
       </div>
+      ${shareButtonsHtml}
     `;
 
     // Add click handlers for delete buttons
@@ -917,4 +944,7 @@ document.addEventListener("DOMContentLoaded", () => {
   checkAuthentication();
   initializeFilters();
   fetchActivities();
+  
+  // Initialize share functionality
+  initializeShareFunctionality(activitiesList, allActivities, formatSchedule, showMessage);
 });
