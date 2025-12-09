@@ -262,14 +262,13 @@ document.addEventListener("DOMContentLoaded", () => {
   function initializeDarkMode() {
     const savedTheme = localStorage.getItem("theme");
     let isDarkMode = false;
-
     if (savedTheme === null) {
       // No saved preference, check system preference
-      isDarkMode = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+      const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)");
+      isDarkMode = prefersDark && prefersDark.matches;
     } else {
       isDarkMode = savedTheme === "dark";
     }
-
     if (isDarkMode) {
       document.body.classList.add("dark-mode");
       themeIcon.textContent = "☀️";
@@ -282,7 +281,6 @@ document.addEventListener("DOMContentLoaded", () => {
   function toggleDarkMode() {
     document.body.classList.toggle("dark-mode");
     const isDarkMode = document.body.classList.contains("dark-mode");
-    
     if (isDarkMode) {
       localStorage.setItem("theme", "dark");
       themeIcon.textContent = "☀️";
