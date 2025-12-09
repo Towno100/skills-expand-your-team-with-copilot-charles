@@ -32,6 +32,40 @@
   --info-light: #d1ecf1;
 }
 
+/* Dark mode color palette */
+body.dark-mode {
+  /* Primary colors */
+  --primary: #7986cb;
+  --primary-light: #9fa8da;
+  --primary-dark: #5c6bc0;
+  --primary-text: #ffffff;
+
+  /* Secondary colors */
+  --secondary: #ff9800;
+  --secondary-light: #ffb74d;
+  --secondary-dark: #f57c00;
+  --secondary-text: #000000;
+
+  /* Neutral colors */
+  --background: #121212;
+  --surface: #1e1e1e;
+  --text-primary: #e0e0e0;
+  --text-secondary: #b0b0b0;
+  --border: #333333;
+  --border-light: #2a2a2a;
+  --border-focus: #444444;
+
+  /* Feedback colors */
+  --success: #66bb6a;
+  --success-light: #2d3a2e;
+  --warning: #ffa726;
+  --warning-light: #3a332d;
+  --error: #ef5350;
+  --error-light: #3a2d2d;
+  --info: #29b6f6;
+  --info-light: #2d3a3a;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -203,6 +237,11 @@ section h3 {
   border-radius: 10px;
   text-transform: uppercase;
   letter-spacing: 0.3px;
+}
+
+/* Dark mode activity tag adjustments */
+body.dark-mode .activity-tag {
+  opacity: 0.9;
 }
 
 /* Capacity Indicator */
@@ -617,11 +656,23 @@ footer {
   position: absolute;
   top: 10px;
   right: 15px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 #user-status {
   display: flex;
   align-items: center;
+}
+
+#dark-mode-toggle {
+  padding: 4px 8px;
+  min-width: auto;
+}
+
+.theme-icon {
+  font-size: 1.2rem;
 }
 
 #user-info {
