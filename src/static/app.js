@@ -26,6 +26,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const closeLoginModal = document.querySelector(".close-login-modal");
   const loginMessage = document.getElementById("login-message");
 
+  // Dark mode elements
+  const darkModeToggle = document.getElementById("dark-mode-toggle");
+  const themeIcon = document.querySelector(".theme-icon");
+
   // Activity categories with corresponding colors
   const activityTypes = {
     sports: { label: "Sports", color: "#e8f5e9", textColor: "#2e7d32" },
@@ -261,6 +265,53 @@ document.addEventListener("DOMContentLoaded", () => {
     const password = document.getElementById("password").value;
     await login(username, password);
   });
+
+  // Dark mode functions
+  function updateThemeIcon(isDarkMode) {
+    themeIcon.textContent = isDarkMode ? "☀️" : "🌙";
+  }
+
+  function initializeDarkMode() {
+    try {
+      const savedTheme = localStorage.getItem("theme");
+      let isDarkMode = false;
+      if (savedTheme === null) {
+        // No saved preference, check system preference
+        if (window.matchMedia) {
+          const prefersDark = window.matchMedia("(prefers-color-scheme: dark)");
+          isDarkMode = prefersDark.matches;
+        }
+      } else {
+        isDarkMode = savedTheme === "dark";
+      }
+      if (isDarkMode) {
+        document.body.classList.add("dark-mode");
+      } else {
+        document.body.classList.remove("dark-mode");
+      }
+      updateThemeIcon(isDarkMode);
+    } catch (error) {
+      console.error("Error initializing dark mode:", error);
+      // Default to light mode if there's an error
+      document.body.classList.remove("dark-mode");
+      updateThemeIcon(false);
+    }
+  }
+
+  function toggleDarkMode() {
+    document.body.classList.toggle("dark-mode");
+    const isDarkMode = document.body.classList.contains("dark-mode");
+    updateThemeIcon(isDarkMode);
+    try {
+      localStorage.setItem("theme", isDarkMode ? "dark" : "light");
+    } catch (error) {
+      console.error("Error saving theme preference:", error);
+      // Continue with theme change even if localStorage fails
+    }
+  }
+
+  // Event listener for dark mode toggle
+  darkModeToggle.addEventListener("click", toggleDarkMode);
 
   // Show loading skeletons
   function showLoadingSkeletons() {
@@ -904,6 +955,7 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   // Initialize app
+  initializeDarkMode();
   checkAuthentication();
   initializeFilters();
   fetchActivities();
