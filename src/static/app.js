@@ -478,10 +478,13 @@ document.addEventListener("DOMContentLoaded", () => {
     return `${baseUrl}?activity=${encodeURIComponent(activityName)}`;
   }
 
+  // Configuration
+  const SCHOOL_NAME = 'Mergington High School';
+
   // Function to handle sharing an activity
   function shareActivity(platform, activityName, description, schedule) {
     const shareUrl = getShareUrl(activityName);
-    const shareText = `Check out ${activityName} at Mergington High School! ${description} - ${schedule}`;
+    const shareText = `Check out ${activityName} at ${SCHOOL_NAME}! ${description} - ${schedule}`;
     
     switch (platform) {
       case 'facebook':
@@ -506,21 +509,9 @@ document.addEventListener("DOMContentLoaded", () => {
       await navigator.clipboard.writeText(text);
       return true;
     } catch (err) {
-      // Fallback for older browsers
-      const textArea = document.createElement('textarea');
-      textArea.value = text;
-      textArea.style.position = 'fixed';
-      textArea.style.left = '-999999px';
-      document.body.appendChild(textArea);
-      textArea.select();
-      try {
-        document.execCommand('copy');
-        document.body.removeChild(textArea);
-        return true;
-      } catch (err) {
-        document.body.removeChild(textArea);
-        return false;
-      }
+      // If clipboard API is not available, show error message
+      console.error('Clipboard API not available:', err);
+      return false;
     }
   }
 
@@ -664,26 +655,43 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
-    // Add click handler for share button
-    const shareButton = activityCard.querySelector(".share-button");
-    const shareOptions = activityCard.querySelector(`[data-share-options="${name}"]`);
-    
-    shareButton.addEventListener("click", (e) => {
-      e.stopPropagation();
-      // Toggle share options visibility
-      shareOptions.classList.toggle("hidden");
-    });
+    activitiesList.appendChild(activityCard);
+  }
 
-    // Add click handlers for share options
-    const shareOptionButtons = activityCard.querySelectorAll(".share-option");
-    shareOptionButtons.forEach((button) => {
-      button.addEventListener("click", async (e) => {
-        e.stopPropagation();
-        const platform = button.dataset.platform;
-        const activityName = button.dataset.activity;
+  // Event delegation for share buttons
+  activitiesList.addEventListener("click", async (e) => {
+    // Handle share button clicks
+    if (e.target.closest(".share-button")) {
+      e.stopPropagation();
+      const shareButton = e.target.closest(".share-button");
+      const activityName = shareButton.dataset.activity;
+      const shareOptions = activitiesList.querySelector(`[data-share-options="${activityName}"]`);
+      
+      if (shareOptions) {
+        // Close all other share options first
+        activitiesList.querySelectorAll("[data-share-options]").forEach(opts => {
+          if (opts !== shareOptions) {
+            opts.classList.add("hidden");
+          }
+        });
+        // Toggle current share options
+        shareOptions.classList.toggle("hidden");
+      }
+    }
+    
+    // Handle share option clicks
+    if (e.target.closest(".share-option")) {
+      e.stopPropagation();
+      const button = e.target.closest(".share-option");
+      const platform = button.dataset.platform;
+      const activityName = button.dataset.activity;
+      const activityDetails = allActivities[activityName];
+      
+      if (activityDetails) {
+        const formattedSchedule = formatSchedule(activityDetails);
         
         if (platform === 'copy') {
-          const success = await shareActivity(platform, activityName, details.description, formattedSchedule);
+          const success = await shareActivity(platform, activityName, activityDetails.description, formattedSchedule);
           if (success) {
             // Visual feedback for copy action
             button.textContent = '✓ Copied!';
@@ -696,25 +704,28 @@ document.addEventListener("DOMContentLoaded", () => {
             showMessage('Failed to copy link', 'error');
           }
         } else {
-          shareActivity(platform, activityName, details.description, formattedSchedule);
+          shareActivity(platform, activityName, activityDetails.description, formattedSchedule);
         }
         
         // Hide share options after sharing
         setTimeout(() => {
-          shareOptions.classList.add("hidden");
+          const shareOptions = activitiesList.querySelector(`[data-share-options="${activityName}"]`);
+          if (shareOptions) {
+            shareOptions.classList.add("hidden");
+          }
         }, 100);
-      });
-    });
-
-    // Close share options when clicking outside
-    document.addEventListener("click", (e) => {
-      if (!shareOptions.contains(e.target) && !shareButton.contains(e.target)) {
-        shareOptions.classList.add("hidden");
       }
-    });
+    }
+  });
 
-    activitiesList.appendChild(activityCard);
-  }
+  // Close share options when clicking outside
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest("#activities-list")) {
+      activitiesList.querySelectorAll("[data-share-options]").forEach(opts => {
+        opts.classList.add("hidden");
+      });
+    }
+  });
 
   // Event listeners for search and filter
   searchInput.addEventListener("input", (event) => {
