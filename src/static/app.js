@@ -260,19 +260,28 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Dark mode functions
   function initializeDarkMode() {
-    const savedTheme = localStorage.getItem("theme");
-    let isDarkMode = false;
-    if (savedTheme === null) {
-      // No saved preference, check system preference
-      const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)");
-      isDarkMode = prefersDark && prefersDark.matches;
-    } else {
-      isDarkMode = savedTheme === "dark";
-    }
-    if (isDarkMode) {
-      document.body.classList.add("dark-mode");
-      themeIcon.textContent = "☀️";
-    } else {
+    try {
+      const savedTheme = localStorage.getItem("theme");
+      let isDarkMode = false;
+      if (savedTheme === null) {
+        // No saved preference, check system preference
+        if (window.matchMedia) {
+          const prefersDark = window.matchMedia("(prefers-color-scheme: dark)");
+          isDarkMode = prefersDark.matches;
+        }
+      } else {
+        isDarkMode = savedTheme === "dark";
+      }
+      if (isDarkMode) {
+        document.body.classList.add("dark-mode");
+        themeIcon.textContent = "☀️";
+      } else {
+        document.body.classList.remove("dark-mode");
+        themeIcon.textContent = "🌙";
+      }
+    } catch (error) {
+      console.error("Error initializing dark mode:", error);
+      // Default to light mode if there's an error
       document.body.classList.remove("dark-mode");
       themeIcon.textContent = "🌙";
     }
@@ -281,12 +290,17 @@ document.addEventListener("DOMContentLoaded", () => {
   function toggleDarkMode() {
     document.body.classList.toggle("dark-mode");
     const isDarkMode = document.body.classList.contains("dark-mode");
-    if (isDarkMode) {
-      localStorage.setItem("theme", "dark");
-      themeIcon.textContent = "☀️";
-    } else {
-      localStorage.setItem("theme", "light");
-      themeIcon.textContent = "🌙";
+    try {
+      if (isDarkMode) {
+        localStorage.setItem("theme", "dark");
+        themeIcon.textContent = "☀️";
+      } else {
+        localStorage.setItem("theme", "light");
+        themeIcon.textContent = "🌙";
+      }
+    } catch (error) {
+      console.error("Error saving theme preference:", error);
+      // Continue with theme change even if localStorage fails
     }
   }
 
