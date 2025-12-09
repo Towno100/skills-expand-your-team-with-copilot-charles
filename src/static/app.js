@@ -261,7 +261,16 @@ document.addEventListener("DOMContentLoaded", () => {
   // Dark mode functions
   function initializeDarkMode() {
     const savedTheme = localStorage.getItem("theme");
-    if (savedTheme === "dark") {
+    let isDarkMode = false;
+
+    if (savedTheme === null) {
+      // No saved preference, check system preference
+      isDarkMode = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+    } else {
+      isDarkMode = savedTheme === "dark";
+    }
+
+    if (isDarkMode) {
       document.body.classList.add("dark-mode");
       themeIcon.textContent = "☀️";
     } else {
