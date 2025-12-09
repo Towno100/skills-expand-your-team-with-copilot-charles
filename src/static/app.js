@@ -472,6 +472,58 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // Function to generate share URL for an activity
+  function getShareUrl(activityName) {
+    const baseUrl = window.location.origin + window.location.pathname;
+    return `${baseUrl}?activity=${encodeURIComponent(activityName)}`;
+  }
+
+  // Function to handle sharing an activity
+  function shareActivity(platform, activityName, description, schedule) {
+    const shareUrl = getShareUrl(activityName);
+    const shareText = `Check out ${activityName} at Mergington High School! ${description} - ${schedule}`;
+    
+    switch (platform) {
+      case 'facebook':
+        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`, '_blank', 'width=600,height=400');
+        break;
+      case 'twitter':
+        window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`, '_blank', 'width=600,height=400');
+        break;
+      case 'email':
+        window.location.href = `mailto:?subject=${encodeURIComponent('Check out this activity!')}&body=${encodeURIComponent(shareText + '\n\n' + shareUrl)}`;
+        break;
+      case 'copy':
+        return copyToClipboard(shareUrl);
+      default:
+        console.error('Unknown share platform:', platform);
+    }
+  }
+
+  // Function to copy text to clipboard
+  async function copyToClipboard(text) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch (err) {
+      // Fallback for older browsers
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-999999px';
+      document.body.appendChild(textArea);
+      textArea.select();
+      try {
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        return true;
+      } catch (err) {
+        document.body.removeChild(textArea);
+        return false;
+      }
+    }
+  }
+
   // Function to render a single activity card
   function renderActivityCard(name, details) {
     const activityCard = document.createElement("div");
@@ -515,6 +567,30 @@ document.addEventListener("DOMContentLoaded", () => {
         <div class="capacity-text">
           <span>${takenSpots} enrolled</span>
           <span>${spotsLeft} spots left</span>
+        </div>
+      </div>
+    `;
+
+    // Create share buttons
+    const shareButtonsHtml = `
+      <div class="share-container">
+        <button class="share-button" data-activity="${name}">
+          <span class="share-icon">📤</span>
+          <span>Share Activity</span>
+        </button>
+        <div class="share-options hidden" data-share-options="${name}">
+          <button class="share-option facebook" data-platform="facebook" data-activity="${name}">
+            📘 Facebook
+          </button>
+          <button class="share-option twitter" data-platform="twitter" data-activity="${name}">
+            🐦 Twitter
+          </button>
+          <button class="share-option email" data-platform="email" data-activity="${name}">
+            ✉️ Email
+          </button>
+          <button class="share-option copy" data-platform="copy" data-activity="${name}">
+            🔗 Copy Link
+          </button>
         </div>
       </div>
     `;
@@ -569,6 +645,7 @@ document.addEventListener("DOMContentLoaded", () => {
         `
         }
       </div>
+      ${shareButtonsHtml}
     `;
 
     // Add click handlers for delete buttons
@@ -586,6 +663,55 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       }
     }
+
+    // Add click handler for share button
+    const shareButton = activityCard.querySelector(".share-button");
+    const shareOptions = activityCard.querySelector(`[data-share-options="${name}"]`);
+    
+    shareButton.addEventListener("click", (e) => {
+      e.stopPropagation();
+      // Toggle share options visibility
+      shareOptions.classList.toggle("hidden");
+    });
+
+    // Add click handlers for share options
+    const shareOptionButtons = activityCard.querySelectorAll(".share-option");
+    shareOptionButtons.forEach((button) => {
+      button.addEventListener("click", async (e) => {
+        e.stopPropagation();
+        const platform = button.dataset.platform;
+        const activityName = button.dataset.activity;
+        
+        if (platform === 'copy') {
+          const success = await shareActivity(platform, activityName, details.description, formattedSchedule);
+          if (success) {
+            // Visual feedback for copy action
+            button.textContent = '✓ Copied!';
+            button.classList.add('copied');
+            setTimeout(() => {
+              button.textContent = '🔗 Copy Link';
+              button.classList.remove('copied');
+            }, 2000);
+          } else {
+            showMessage('Failed to copy link', 'error');
+          }
+        } else {
+          shareActivity(platform, activityName, details.description, formattedSchedule);
+        }
+        
+        // Hide share options after sharing
+        setTimeout(() => {
+          shareOptions.classList.add("hidden");
+        }, 100);
+      });
+    });
+
+    // Close share options when clicking outside
+    document.addEventListener("click", (e) => {
+      if (!shareOptions.contains(e.target) && !shareButton.contains(e.target)) {
+        shareOptions.classList.add("hidden");
+      }
+    });
 
     activitiesList.appendChild(activityCard);
   }
